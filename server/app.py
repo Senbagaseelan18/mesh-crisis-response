@@ -6,7 +6,6 @@ PHASE 1: OpenEnv-compliant implementation with proper endpoints
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import json
 
 app = FastAPI(
     title="Emergency Mesh-Network Router",
@@ -37,10 +36,11 @@ async def health():
     return {"status": "healthy", "code": 200}
 
 @app.post("/reset")
-async def reset_environment(request: Request = None):
+async def reset_environment():
     """
     PHASE 1 CRITICAL: POST /reset endpoint
     Must respond with HTTP 200 and valid JSON observation
+    Accepts any request body (or empty body)
     """
     try:
         return JSONResponse(
