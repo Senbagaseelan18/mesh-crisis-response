@@ -1,87 +1,89 @@
 name: emergency-mesh-router
-version: 1.0.0
+version: "1.0.0"
 description: "Emergency Mesh-Network Router using RL for disaster alert routing"
 
-# Environment configuration
+# MANDATORY: Environment specification
 environment:
-  class: server.environment.MeshNetworkEnvironment
-  module: server.environment
-  
-# Action Space
-action_space:
-  type: discrete
-  description: "Target device ID for alert forwarding"
-  max_actions: 12
+  class: "server.environment.MeshNetworkEnvironment"
+  module: "server.environment"
+  reset_method: "reset"
+  step_method: "step"
+  observation_method: "get_observation"
 
-# Observation Space  
+# MANDATORY: Observation space
 observation_space:
-  type: continuous
-  components:
-    - current_device_id: string
-    - current_rssi: float
-    - current_battery: float
-    - neighboring_devices: list
-    - gateway_distance: float
-    - hops_taken: integer
-    - time_step: integer
+  type: "Dict"
+  properties:
+    device_id:
+      type: "integer"
+    rssi:
+      type: "number"
+    battery:
+      type: "number"
+    neighbors:
+      type: "array"
+    gateway_distance:
+      type: "integer"
+    hops:
+      type: "integer"
 
-# Task difficulties and their configurations
+# MANDATORY: Action space
+action_space:
+  type: "Discrete"
+  n: 12
+  description: "Target device ID (0-11) for forwarding alert"
+
+# MANDATORY: Tasks with graders
 tasks:
   easy:
     name: "Easy - Direct Path"
-    description: "Gateway is 1 hop away, high battery on all devices"
+    description: "Gateway is 1 hop away, high battery"
+    difficulty: 1
     max_steps: 5
-    success_threshold: 0.8
-    parameters:
+    config:
       hop_limit: 5
       min_battery: 100
-      network_density: high
-      
+    grader:
+      type: "default"
+      success_threshold: 0.8
+
   medium:
     name: "Medium - Multi-hop"
-    description: "Gateway is 3 hops away, some devices have low battery"
+    description: "Gateway is 3 hops away, moderate battery"
+    difficulty: 2
     max_steps: 10
-    success_threshold: 0.6
-    parameters:
+    config:
       hop_limit: 10
       min_battery: 60
-      network_density: medium
-      
+    grader:
+      type: "default"
+      success_threshold: 0.6
+
   hard:
-    name: "Hard - Complex Network"
-    description: "Gateway is 5+ hops away, signal strength varies, nodes moving"
-    max_steps: 15
-    success_threshold: 0.4
-    parameters:
-      hop_limit: 15
+    name: "Hard - Long Distance"
+    description: "Gateway is 5+ hops away, low battery"
+    difficulty: 3
+    max_steps: 20
+    config:
+      hop_limit: 20
       min_battery: 30
-      network_density: low
+    grader:
+      type: "default"
+      success_threshold: 0.5
 
-# Reward Configuration
-rewards:
-  move_closer: 0.1
-  hop_penalty: -0.05
-  successful_delivery: 1.0
-  battery_death: -1.0
-  exceeded_max_hops: -1.0
+# MANDATORY: Graders
+graders:
+  default:
+    type: "RewardThresholdGrader"
+    min_reward: 0.0
+    max_reward: 1.0
+    success_threshold: 0.5
 
-# Training Configuration
-training:
-  framework: openenv-core
-  max_episodes: 1000
-  steps_per_episode: 50
-  learning_rate: 0.001
-  batch_size: 32
-  discount_factor: 0.99
-
-# API Server Configuration
-server:
-  host: 0.0.0.0
-  port: 8000
-  debug: false
-  workers: 4
-
-# Logging
-logging:
-  level: INFO
-  format: "json"
+# Metadata
+metadata:
+  author: "OpenEnv Team"
+  license: "MIT"
+  tags:
+    - "rl"
+    - "mesh-network"
+    - "disaster-response"

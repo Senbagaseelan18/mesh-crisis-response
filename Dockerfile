@@ -2,23 +2,22 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install minimal dependencies only - FastAPI and Uvicorn
+# Install FastAPI, Uvicorn, and OpenAI Client (MANDATORY for Phase 1)
 RUN pip install --no-cache-dir \
     fastapi \
-    uvicorn[standard]
+    uvicorn[standard] \
+    openai \
+    pydantic
 
-# Copy only requirements for reference
-COPY requirements.txt .
-
-# Try to install requirements, but don't fail if there are issues
-# The app will work with just FastAPI
-RUN pip install --no-cache-dir -r requirements.txt 2>/dev/null || echo "Some dependencies skipped"
-
-# Copy all project files
+# Copy all files
 COPY . .
 
-# Expose port
+# Expose port 8000
 EXPOSE 8000
 
-# Run the server with the main app
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# Start the server - PHASE 1 server
 CMD ["python", "-m", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]
