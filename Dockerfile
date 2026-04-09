@@ -14,5 +14,5 @@ COPY . .
 # Expose port 8000
 EXPOSE 8000
 
-# Start server with minimal config
-CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Start server by calling main() function
+CMD ["python", "-m", "server.app"]
