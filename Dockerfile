@@ -2,8 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install FastAPI and Uvicorn only
-RUN pip install --no-cache-dir fastapi uvicorn[standard]
+# Copy requirements first
+COPY requirements.txt .
+
+# Install all dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
