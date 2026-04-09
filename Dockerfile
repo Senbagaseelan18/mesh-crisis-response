@@ -14,5 +14,5 @@ COPY . .
 # Expose port 8000
 EXPOSE 8000
 
-# Start server by calling main() function
-CMD ["python", "-m", "server.app"]
+# Start server directly with uvicorn
+CMD ["python", "-c", "from server.app import main; main()"]
