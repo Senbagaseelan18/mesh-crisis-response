@@ -8,32 +8,36 @@ environment:
   module: "server.environment"
   reset_method: "reset"
   step_method: "step"
-  observation_method: "get_observation"
+  observation_method: "state"
 
 # MANDATORY: Observation space
 observation_space:
   type: "Dict"
   properties:
-    device_id:
-      type: "integer"
-    rssi:
+    current_device_id:
+      type: "string"
+    current_rssi:
       type: "number"
-    battery:
+    current_battery:
       type: "number"
-    neighbors:
+    neighboring_devices:
       type: "array"
     gateway_distance:
+      type: "number"
+    hops_taken:
       type: "integer"
-    hops:
+    time_step:
       type: "integer"
+    task_difficulty:
+      type: "string"
 
 # MANDATORY: Action space
 action_space:
   type: "Discrete"
   n: 12
-  description: "Target device ID (0-11) for forwarding alert"
+  description: "Target device ID for forwarding alert"
 
-# MANDATORY: Tasks with graders
+# MANDATORY: Tasks with explicit graders
 tasks:
   easy:
     name: "Easy - Direct Path"
@@ -44,8 +48,12 @@ tasks:
       hop_limit: 5
       min_battery: 100
     grader:
-      type: "default"
-      success_threshold: 0.8
+      class: "graders.RewardThresholdGrader"
+      module: "graders"
+      config:
+        min_reward: 0.0
+        max_reward: 1.0
+        success_threshold: 0.8
 
   medium:
     name: "Medium - Multi-hop"
@@ -56,8 +64,12 @@ tasks:
       hop_limit: 10
       min_battery: 60
     grader:
-      type: "default"
-      success_threshold: 0.6
+      class: "graders.RewardThresholdGrader"
+      module: "graders"
+      config:
+        min_reward: 0.0
+        max_reward: 1.0
+        success_threshold: 0.6
 
   hard:
     name: "Hard - Long Distance"
@@ -68,16 +80,37 @@ tasks:
       hop_limit: 20
       min_battery: 30
     grader:
-      type: "default"
-      success_threshold: 0.5
+      class: "graders.RewardThresholdGrader"
+      module: "graders"
+      config:
+        min_reward: 0.0
+        max_reward: 1.0
+        success_threshold: 0.5
 
-# MANDATORY: Graders
+# MANDATORY: Grader implementations
 graders:
   default:
-    type: "RewardThresholdGrader"
-    min_reward: 0.0
-    max_reward: 1.0
-    success_threshold: 0.5
+    class: "graders.RewardThresholdGrader"
+    module: "graders"
+    description: "Grades based on reward thresholds"
+    config:
+      min_reward: 0.0
+      max_reward: 1.0
+      success_threshold: 0.5
+  
+  efficient:
+    class: "graders.EfficientGrader"
+    module: "graders"
+    description: "Grades based on hop efficiency"
+    config:
+      success_threshold: 0.6
+  
+  robustness:
+    class: "graders.RobustnessGrader"
+    module: "graders"
+    description: "Grades on robustness across conditions"
+    config:
+      success_threshold: 0.5
 
 # Metadata
 metadata:
@@ -87,3 +120,8 @@ metadata:
     - "rl"
     - "mesh-network"
     - "disaster-response"
+  keywords:
+    - emergency
+    - routing
+    - mesh-network
+    - reinforcement-learning

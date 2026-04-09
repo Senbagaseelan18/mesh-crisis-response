@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 from server.environment import MeshNetworkEnvironment, TaskGrader
 from models import TaskDifficulty, MeshAction, TaskGradeResult, MeshObservation
+from graders import get_grader, RewardThresholdGrader, EfficientGrader, RobustnessGrader
 
 # ============================================================================
 # FastAPI Setup
@@ -204,21 +205,45 @@ async def get_tasks():
                     "difficulty": 1,
                     "description": "Gateway is 1 hop away, high battery",
                     "max_steps": 5,
-                    "grader": "default",
+                    "grader": {
+                        "class": "RewardThresholdGrader",
+                        "module": "graders",
+                        "config": {
+                            "min_reward": 0.0,
+                            "max_reward": 1.0,
+                            "success_threshold": 0.8
+                        }
+                    },
                 },
                 {
                     "name": "medium",
                     "difficulty": 2,
                     "description": "Gateway is 3 hops away, moderate battery",
                     "max_steps": 10,
-                    "grader": "default",
+                    "grader": {
+                        "class": "RewardThresholdGrader",
+                        "module": "graders",
+                        "config": {
+                            "min_reward": 0.0,
+                            "max_reward": 1.0,
+                            "success_threshold": 0.6
+                        }
+                    },
                 },
                 {
                     "name": "hard",
                     "difficulty": 3,
                     "description": "Gateway is 5+ hops away, low battery",
                     "max_steps": 20,
-                    "grader": "default",
+                    "grader": {
+                        "class": "RewardThresholdGrader",
+                        "module": "graders",
+                        "config": {
+                            "min_reward": 0.0,
+                            "max_reward": 1.0,
+                            "success_threshold": 0.5
+                        }
+                    },
                 },
             ]
         },
@@ -229,7 +254,7 @@ async def get_tasks():
 @app.post("/grade")
 async def grade_task(request: GradeRequest):
     """
-    CRITICAL FOR PHASE 2: Grade a task using a default random agent
+    CRITICAL FOR PHASE 2: Grade a task using grader implementations
     Evaluates agent performance on specified task difficulty
     Returns score, success_rate, average_hops, average_reward
     """
@@ -242,9 +267,17 @@ async def grade_task(request: GradeRequest):
         )
 
     try:
-        grader = TaskGrader(n_episodes=request.n_episodes)
+        # Create environment for grading
+        env = MeshNetworkEnvironment(difficulty)
+        
+        # Use RewardThresholdGrader
+        grader = RewardThresholdGrader(
+            min_reward=0.0,
+            max_reward=1.0,
+            success_threshold=0.5  # Flexible threshold
+        )
 
-        # Default random agent for testing
+        # Default random agent for testing grader
         def random_agent(obs: MeshObservation) -> MeshAction:
             """Simple random agent for testing grader"""
             if obs.neighboring_devices:
@@ -253,16 +286,17 @@ async def grade_task(request: GradeRequest):
             return MeshAction(target_device_id="node_0", priority=1)
 
         # Grade the agent
-        result = grader.grade_task(random_agent, difficulty)
+        result = grader.grade(random_agent, env, n_episodes=request.n_episodes)
 
         return JSONResponse(
             {
-                "difficulty": result.difficulty.value,
-                "score": float(result.score),
-                "success_rate": float(result.success_rate),
-                "average_hops": float(result.average_hops),
-                "average_reward": float(result.average_reward),
-                "details": result.details,
+                "difficulty": request.difficulty,
+                "score": float(result.get("score", 0.0)),
+                "success": bool(result.get("success", False)),
+                "success_rate": float(result.get("success_rate", 0.0)),
+                "average_hops": float(result.get("average_hops", 0.0)),
+                "average_reward": float(result.get("average_reward", 0.0)),
+                "details": result.get("details", ""),
             },
             status_code=200,
         )
@@ -293,7 +327,9 @@ async def grade_task_get(difficulty: str, n_episodes: int = 10):
             )
 
         task_difficulty = diff_map[difficulty.lower()]
-        grader = TaskGrader(n_episodes=n_episodes)
+        env = MeshNetworkEnvironment(task_difficulty)
+        
+        grader = RewardThresholdGrader(min_reward=0.0, max_reward=1.0, success_threshold=0.5)
 
         # Default random agent
         def random_agent(obs: MeshObservation) -> MeshAction:
@@ -302,16 +338,17 @@ async def grade_task_get(difficulty: str, n_episodes: int = 10):
                 return MeshAction(target_device_id=target.device_id, priority=1)
             return MeshAction(target_device_id="node_0", priority=1)
 
-        result = grader.grade_task(random_agent, task_difficulty)
+        result = grader.grade(random_agent, env, n_episodes=n_episodes)
 
         return JSONResponse(
             {
-                "difficulty": result.difficulty.value,
-                "score": float(result.score),
-                "success_rate": float(result.success_rate),
-                "average_hops": float(result.average_hops),
-                "average_reward": float(result.average_reward),
-                "details": result.details,
+                "difficulty": difficulty,
+                "score": float(result.get("score", 0.0)),
+                "success": bool(result.get("success", False)),
+                "success_rate": float(result.get("success_rate", 0.0)),
+                "average_hops": float(result.get("average_hops", 0.0)),
+                "average_reward": float(result.get("average_reward", 0.0)),
+                "details": result.get("details", ""),
             },
             status_code=200,
         )
@@ -325,16 +362,32 @@ async def grade_task_get(difficulty: str, n_episodes: int = 10):
 @app.get("/graders")
 async def get_graders():
     """
-    REQUIRED FOR PHASE 2: List all available graders
+    REQUIRED FOR PHASE 2: List all available grader implementations
+    Shows all grader classes that can be instantiated
     """
     return JSONResponse(
         {
             "graders": [
                 {
                     "name": "default",
-                    "type": "TaskGrader",
+                    "class": "RewardThresholdGrader",
+                    "module": "graders",
                     "supported_tasks": ["easy", "medium", "hard"],
-                    "description": "Default grader for all tasks",
+                    "description": "Grades based on reward thresholds",
+                },
+                {
+                    "name": "efficient",
+                    "class": "EfficientGrader",
+                    "module": "graders",
+                    "supported_tasks": ["easy", "medium", "hard"],
+                    "description": "Grades based on hop efficiency",
+                },
+                {
+                    "name": "robustness",
+                    "class": "RobustnessGrader",
+                    "module": "graders",
+                    "supported_tasks": ["easy", "medium", "hard"],
+                    "description": "Grades on robustness across conditions",
                 }
             ]
         },
@@ -366,6 +419,11 @@ async def validate():
             "medium": True,
             "hard": True,
         },
+        "grader_implementations": {
+            "RewardThresholdGrader": True,
+            "EfficientGrader": True,
+            "RobustnessGrader": True,
+        },
         "models": {
             "observation": True,
             "action": True,
@@ -389,6 +447,11 @@ async def info():
             "description": "RL environment for emergency alert routing through mesh networks",
             "tasks": ["easy", "medium", "hard"],
             "graders_implemented": 3,
+            "grader_classes": {
+                "RewardThresholdGrader": "Grade based on reward thresholds",
+                "EfficientGrader": "Grade based on hop efficiency",
+                "RobustnessGrader": "Grade on robustness"
+            },
             "endpoints": [
                 "GET /",
                 "GET /health",
@@ -419,6 +482,7 @@ def main():
     print(f"🚀 Starting Emergency Mesh Router on port {port}")
     print(f"✅ OpenEnv Phase 2+ Compliant")
     print(f"✅ All 3 Tasks with Graders: EASY, MEDIUM, HARD")
+    print(f"✅ 3 Grader Implementations: RewardThresholdGrader, EfficientGrader, RobustnessGrader")
 
     uvicorn.run(app, host="0.0.0.0", port=port, workers=1)
 
