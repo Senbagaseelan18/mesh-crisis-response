@@ -5,10 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "emergency-mesh-router"
 version = "0.1.0"
+description = "Emergency Mesh Router - RL environment for disaster alert routing"
 dependencies = [
-    "fastapi",
-    "uvicorn",
-    "pydantic",
-    "openenv-core",
-    "numpy"
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.20.0",
+    "pydantic>=2.0.0",
+    "openenv-core>=1.0.0",
+    "numpy>=1.20.0"
 ]
+
+[project.scripts]
+server = "server.app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
