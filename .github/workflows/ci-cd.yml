@@ -1,0 +1,171 @@
+# GitHub Actions CI/CD Pipeline for Emergency Mesh-Network Router
+name: OpenEnv Hackathon CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *'  # Daily run
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio pytest-benchmark
+    
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Type check with mypy
+      run: |
+        pip install mypy
+        mypy --ignore-missing-imports server/ models.py agents.py || true
+    
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=server --cov=models --cov=agents --cov-report=xml --cov-report=html
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -t emergency-mesh-router:latest .
+        docker build -t emergency-mesh-router:${{ github.sha }} .
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm emergency-mesh-router:latest python -c "from server.app import app; print('✅ Docker image valid')"
+
+  performance:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest-benchmark psutil
+    
+    - name: Run performance benchmarks
+      run: |
+        python benchmarks.py 2>&1 | tee benchmark_output.txt || true
+    
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: benchmark_output.txt
+      if: always()
+
+  inference:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Test inference script (easy)
+      run: |
+        python inference.py --task easy --agent greedy --episodes 1
+    
+    - name: Test inference script (medium)
+      run: |
+        python inference.py --task medium --agent intelligent --episodes 1
+    
+    - name: Test inference script (hard)
+      run: |
+        python inference.py --task hard --agent conservative --episodes 1
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, inference]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    continue-on-error: true
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Verify Docker build
+      run: |
+        docker build -t emergency-mesh-router:${{ github.sha }} .
+        docker run --rm emergency-mesh-router:${{ github.sha }} python -c "print('✅ Docker deployment verified')"
+    
+    - name: Docker Hub Push (Optional)
+      if: env.HAS_DOCKER_CREDS == 'true'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Push to registry (Optional)
+      if: env.HAS_DOCKER_CREDS == 'true'
+      run: |
+        docker tag emergency-mesh-router:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/emergency-mesh-router:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/emergency-mesh-router:latest
+    
+    - name: Build Summary
+      run: |
+        echo "✅ Build verified successfully"
+        echo "📦 Docker image: emergency-mesh-router:${{ github.sha }}"
+        echo "📚 Ready for deployment"

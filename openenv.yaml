@@ -1,0 +1,87 @@
+name: emergency-mesh-router
+version: 1.0.0
+description: "Emergency Mesh-Network Router using RL for disaster alert routing"
+
+# Environment configuration
+environment:
+  class: server.environment.MeshNetworkEnvironment
+  module: server.environment
+  
+# Action Space
+action_space:
+  type: discrete
+  description: "Target device ID for alert forwarding"
+  max_actions: 12
+
+# Observation Space  
+observation_space:
+  type: continuous
+  components:
+    - current_device_id: string
+    - current_rssi: float
+    - current_battery: float
+    - neighboring_devices: list
+    - gateway_distance: float
+    - hops_taken: integer
+    - time_step: integer
+
+# Task difficulties and their configurations
+tasks:
+  easy:
+    name: "Easy - Direct Path"
+    description: "Gateway is 1 hop away, high battery on all devices"
+    max_steps: 5
+    success_threshold: 0.8
+    parameters:
+      hop_limit: 5
+      min_battery: 100
+      network_density: high
+      
+  medium:
+    name: "Medium - Multi-hop"
+    description: "Gateway is 3 hops away, some devices have low battery"
+    max_steps: 10
+    success_threshold: 0.6
+    parameters:
+      hop_limit: 10
+      min_battery: 60
+      network_density: medium
+      
+  hard:
+    name: "Hard - Complex Network"
+    description: "Gateway is 5+ hops away, signal strength varies, nodes moving"
+    max_steps: 15
+    success_threshold: 0.4
+    parameters:
+      hop_limit: 15
+      min_battery: 30
+      network_density: low
+
+# Reward Configuration
+rewards:
+  move_closer: 0.1
+  hop_penalty: -0.05
+  successful_delivery: 1.0
+  battery_death: -1.0
+  exceeded_max_hops: -1.0
+
+# Training Configuration
+training:
+  framework: openenv-core
+  max_episodes: 1000
+  steps_per_episode: 50
+  learning_rate: 0.001
+  batch_size: 32
+  discount_factor: 0.99
+
+# API Server Configuration
+server:
+  host: 0.0.0.0
+  port: 8000
+  debug: false
+  workers: 4
+
+# Logging
+logging:
+  level: INFO
+  format: "json"
