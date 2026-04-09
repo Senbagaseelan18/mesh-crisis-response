@@ -83,7 +83,9 @@ def get_tasks():
 def main():
     """Main entry point for server startup"""
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
+    import os
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port, workers=1)
 
 
 if __name__ == "__main__":
