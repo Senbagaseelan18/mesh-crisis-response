@@ -1,31 +1,35 @@
 """
-Emergency Mesh Router - Minimal OpenEnv Endpoint Server
-Plain Python, zero dependencies beyond FastAPI
+Emergency Mesh Router - OpenEnv Endpoint Server
+Ultra-robust minimal implementation
 """
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Emergency Mesh Router", version="1.0.0")
+app = FastAPI(title="Emergency Mesh Router")
 
-# CORS
+# Enable CORS for everything
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# Root
+
 @app.get("/")
 def root():
-    return {"status": "ok"}
+    return JSONResponse({"status": "ok"}, status_code=200)
 
-# Health
+
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return JSONResponse({"status": "healthy"}, status_code=200)
 
-# POST /reset - CRITICAL
+
 @app.post("/reset")
 def reset_env():
-    """OpenEnv reset endpoint - MUST return 200"""
-    return {
+    """
+    OpenEnv reset endpoint
+    MUST respond with HTTP 200 and observation
+    """
+    response = {
         "observation": {
             "state": 0,
             "battery": 100.0,
@@ -34,12 +38,13 @@ def reset_env():
         "reward": 0.0,
         "done": False
     }
+    return JSONResponse(content=response, status_code=200)
 
-# POST /step
+
 @app.post("/step")
 def step_env(action: dict = None):
     """OpenEnv step endpoint"""
-    return {
+    response = {
         "observation": {
             "state": 1,
             "battery": 95.0,
@@ -48,29 +53,33 @@ def step_env(action: dict = None):
         "reward": 0.5,
         "done": False
     }
+    return JSONResponse(content=response, status_code=200)
 
-# GET /state
+
 @app.get("/state")
 def get_state():
     """OpenEnv state endpoint"""
-    return {
+    response = {
         "state": 0,
         "battery": 100.0,
         "hops": 0
     }
+    return JSONResponse(content=response, status_code=200)
 
-# GET /tasks
+
 @app.get("/tasks")
 def get_tasks():
     """List tasks"""
-    return {
+    response = {
         "tasks": [
             {"name": "easy", "difficulty": 1},
             {"name": "medium", "difficulty": 2},
             {"name": "hard", "difficulty": 3}
         ]
     }
+    return JSONResponse(content=response, status_code=200)
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
