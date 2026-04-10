@@ -1,12 +1,13 @@
 """
 Task definitions with grainer assignments for OpenEnv Phase 2+
 Explicit task registry for validator discovery
+5 TASKS with 5 DIFFERENT GRADERS - ENHANCED COVERAGE
 """
 
 from dataclasses import dataclass
 from typing import Dict, Any, Type
 from models import TaskDifficulty
-from graders import BaseGrader, RewardThresholdGrader, EfficientGrader, RobustnessGrader
+from graders import BaseGrader, RewardThresholdGrader, EfficientGrader, RobustnessGrader, BatteryEfficientGrader, BalancedMetricsGrader
 
 
 @dataclass
@@ -58,11 +59,37 @@ HARD_TASK = Task(
     }
 )
 
+# TASK 4: Expert - Battery Constrained
+EXPERT_TASK = Task(
+    name="expert",
+    difficulty=TaskDifficulty.HARD,
+    description="Gateway is far away with severe battery constraints",
+    max_steps=25,
+    grader_class=BatteryEfficientGrader,
+    grader_config={
+        "success_threshold": 0.55
+    }
+)
+
+# TASK 5: Extreme - Balanced Performance
+EXTREME_TASK = Task(
+    name="extreme",
+    difficulty=TaskDifficulty.HARD,
+    description="Extreme challenge requiring balanced performance across all metrics",
+    max_steps=30,
+    grader_class=BalancedMetricsGrader,
+    grader_config={
+        "success_threshold": 0.5
+    }
+)
+
 # REGISTRY: All tasks in a discoverable format
 ALL_TASKS = {
     "easy": EASY_TASK,
     "medium": MEDIUM_TASK,
     "hard": HARD_TASK,
+    "expert": EXPERT_TASK,
+    "extreme": EXTREME_TASK,
 }
 
 # Count graders
@@ -71,6 +98,8 @@ GRADERS_PER_TASK = {
     "easy": "RewardThresholdGrader",
     "medium": "EfficientGrader",
     "hard": "RobustnessGrader",
+    "expert": "BatteryEfficientGrader",
+    "extreme": "BalancedMetricsGrader",
 }
 
 
@@ -122,7 +151,7 @@ def validate_tasks() -> Dict[str, Any]:
 if __name__ == "__main__":
     # Test the tasks registry
     print("=" * 60)
-    print("TASKS REGISTRY VALIDATION")
+    print("TASKS REGISTRY VALIDATION - 5 TASKS WITH 5 GRADERS")
     print("=" * 60)
     
     result = validate_tasks()

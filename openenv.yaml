@@ -86,6 +86,36 @@ tasks:
       config:
         success_threshold: 0.5
 
+  expert:
+    name: "Expert - Battery Constrained"
+    description: "Gateway is far away with severe battery constraints"
+    difficulty: 4
+    max_steps: 25
+    config:
+      hop_limit: 25
+      min_battery: 20
+    grader:
+      type: "battery_efficient"
+      class: "graders.BatteryEfficientGrader"
+      module: "graders"
+      config:
+        success_threshold: 0.55
+
+  extreme:
+    name: "Extreme - Balanced Performance"
+    description: "Extreme challenge requiring balanced performance across all metrics"
+    difficulty: 5
+    max_steps: 30
+    config:
+      hop_limit: 30
+      min_battery: 10
+    grader:
+      type: "balanced"
+      class: "graders.BalancedMetricsGrader"
+      module: "graders"
+      config:
+        success_threshold: 0.5
+
 # MANDATORY: Grader implementations
 graders:
   default:
@@ -108,6 +138,20 @@ graders:
     class: "graders.RobustnessGrader"
     module: "graders"
     description: "Grades on robustness across conditions"
+    config:
+      success_threshold: 0.5
+  
+  battery_efficient:
+    class: "graders.BatteryEfficientGrader"
+    module: "graders"
+    description: "Grades on battery efficiency with constrained power"
+    config:
+      success_threshold: 0.55
+  
+  balanced:
+    class: "graders.BalancedMetricsGrader"
+    module: "graders"
+    description: "Balanced grader combining success, efficiency, and reward metrics"
     config:
       success_threshold: 0.5
 

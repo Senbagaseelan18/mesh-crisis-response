@@ -18,6 +18,8 @@ from graders import (
     RewardThresholdGrader,
     EfficientGrader,
     RobustnessGrader,
+    BatteryEfficientGrader,
+    BalancedMetricsGrader,
     get_grader,
     GRADER_REGISTRY,
 )
@@ -54,6 +56,8 @@ __all__ = [
     "RewardThresholdGrader",
     "EfficientGrader",
     "RobustnessGrader",
+    "BatteryEfficientGrader",
+    "BalancedMetricsGrader",
     "get_grader",
     "GRADER_REGISTRY",
     # Tasks - CRITICAL FOR VALIDATOR

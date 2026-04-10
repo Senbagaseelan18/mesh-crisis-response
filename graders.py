@@ -186,12 +186,114 @@ class RobustnessGrader(BaseGrader):
         }
 
 
+class BatteryEfficientGrader(BaseGrader):
+    """
+    Grades agents on battery efficiency.
+    Penalizes excessive battery drain while rewarding successful delivery.
+    """
+    
+    def __init__(self, success_threshold: float = 0.55):
+        self.success_threshold = success_threshold
+    
+    def grade(self, agent_fn: Callable, environment, n_episodes: int = 10) -> Dict[str, Any]:
+        """Grade agent on battery efficiency"""
+        total_reward = 0.0
+        successes = 0
+        total_battery_used = 0.0
+        
+        for episode in range(n_episodes):
+            obs = environment.reset(seed=episode)
+            done = False
+            episode_battery_drain = 0.0
+            
+            while not done and environment.current_hop < environment.max_hops:
+                action = agent_fn(obs)
+                obs, reward, done, info = environment.step(action)
+                episode_battery_drain += (100 - obs.current_battery)
+            
+            total_reward += environment.episode_reward
+            if environment.success:
+                successes += 1
+            total_battery_used += episode_battery_drain
+        
+        success_rate = successes / n_episodes
+        avg_battery_used = total_battery_used / n_episodes
+        battery_efficiency = max(0, 1.0 - (avg_battery_used / 100.0))
+        
+        # Score = 50% success + 50% battery efficiency
+        score = 0.5 * success_rate + 0.5 * battery_efficiency
+        score = max(0.001, min(0.999, score))
+        
+        is_success = score >= self.success_threshold
+        
+        return {
+            "score": score,
+            "success": is_success,
+            "success_rate": success_rate,
+            "battery_efficiency": battery_efficiency,
+            "average_battery_used": avg_battery_used,
+            "details": f"Score: {score:.2f}, Battery Efficiency: {battery_efficiency:.1%}, Success: {successes}/{n_episodes}"
+        }
+
+
+class BalancedMetricsGrader(BaseGrader):
+    """
+    Grades agents using balanced metrics.
+    Combines success rate, efficiency, and reward into single score.
+    """
+    
+    def __init__(self, success_threshold: float = 0.5):
+        self.success_threshold = success_threshold
+    
+    def grade(self, agent_fn: Callable, environment, n_episodes: int = 10) -> Dict[str, Any]:
+        """Grade agent using balanced metrics"""
+        total_reward = 0.0
+        successes = 0
+        total_hops = 0
+        
+        for episode in range(n_episodes):
+            obs = environment.reset(seed=episode)
+            done = False
+            
+            while not done and environment.current_hop < environment.max_hops:
+                action = agent_fn(obs)
+                obs, reward, done, info = environment.step(action)
+            
+            total_reward += environment.episode_reward
+            if environment.success:
+                successes += 1
+            total_hops += environment.current_hop
+        
+        success_rate = successes / n_episodes
+        avg_hops = total_hops / n_episodes if successes > 0 else environment.max_hops
+        avg_reward = total_reward / n_episodes
+        hop_efficiency = 1.0 - (avg_hops / environment.max_hops)
+        
+        # Balanced score: 33% success + 33% efficiency + 34% reward
+        normalized_reward = max(0, avg_reward / 10.0)
+        score = 0.33 * success_rate + 0.33 * hop_efficiency + 0.34 * normalized_reward
+        score = max(0.001, min(0.999, score))
+        
+        is_success = score >= self.success_threshold
+        
+        return {
+            "score": score,
+            "success": is_success,
+            "success_rate": success_rate,
+            "hop_efficiency": hop_efficiency,
+            "average_reward": avg_reward,
+            "details": f"Score: {score:.2f}, Success: {successes}/{n_episodes}, Efficiency: {hop_efficiency:.1%}"
+        }
+
+
 # Grader registry - maps grader type names to classes
 GRADER_REGISTRY = {
     "default": RewardThresholdGrader,
     "reward_threshold": RewardThresholdGrader,
     "efficient": EfficientGrader,
     "robustness": RobustnessGrader,
+    "battery_efficient": BatteryEfficientGrader,
+    "balanced": BalancedMetricsGrader,
 }
 
 
