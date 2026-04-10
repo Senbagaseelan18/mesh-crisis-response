@@ -466,12 +466,16 @@ async def info():
 def main():
     """Main entry point for server startup"""
     import uvicorn
+    from tasks import validate_tasks
 
     port = int(os.environ.get("PORT", 7860))
+    validation = validate_tasks()
+    
     print(f"🚀 Starting Emergency Mesh Router on port {port}")
     print(f"✅ OpenEnv Phase 2+ Compliant")
-    print(f"✅ All 3 Tasks with Graders: EASY, MEDIUM, HARD")
-    print(f"✅ 3 Grader Implementations: RewardThresholdGrader, EfficientGrader, RobustnessGrader")
+    print(f"✅ Tasks: {len(validation['tasks'])} (easy, medium, hard, expert, extreme)")
+    print(f"✅ Graders: {len(validation['grader_implementations'])} ({', '.join(validation['grader_implementations'])})")
+    print(f"✅ Validation Status: {'PASS' if validation['validation_passed'] else 'FAIL'}")
 
     uvicorn.run(app, host="0.0.0.0", port=port, workers=1)
 
