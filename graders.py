@@ -76,7 +76,8 @@ class RewardThresholdGrader(BaseGrader):
         
         # Score = 70% success rate + 30% reward achievement
         score = 0.7 * success_rate + 0.3 * max(0, min(1, normalized_reward))
-        score = max(0.0, min(1.0, score))
+        # Clamp to strictly (0, 1) - not 0.0 or 1.0 to satisfy validator
+        score = max(0.001, min(0.999, score))
         
         # Success = score meets threshold
         is_success = score >= self.success_threshold
@@ -125,7 +126,8 @@ class EfficientGrader(BaseGrader):
         
         # Score = 60% success + 40% hop efficiency
         score = 0.6 * success_rate + 0.4 * max(0, hop_efficiency)
-        score = max(0.0, min(1.0, score))
+        # Clamp to strictly (0, 1) - not 0.0 or 1.0 to satisfy validator
+        score = max(0.001, min(0.999, score))
         
         is_success = score >= self.success_threshold
         
@@ -171,6 +173,8 @@ class RobustnessGrader(BaseGrader):
         
         # Score based on consistent success
         score = success_rate
+        # Clamp to strictly (0, 1) - not 0.0 or 1.0 to satisfy validator
+        score = max(0.001, min(0.999, score))
         is_success = score >= self.success_threshold
         
         return {
