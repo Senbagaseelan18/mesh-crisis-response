@@ -20,6 +20,7 @@ from pydantic import BaseModel
 from server.environment import MeshNetworkEnvironment, TaskGrader
 from models import TaskDifficulty, MeshAction, TaskGradeResult, MeshObservation
 from graders import get_grader, RewardThresholdGrader, EfficientGrader, RobustnessGrader
+from tasks import get_all_tasks, get_task_grader, validate_tasks
 
 # ============================================================================
 # FastAPI Setup
@@ -194,57 +195,49 @@ async def get_state():
 @app.get("/tasks")
 async def get_tasks():
     """
-    List all available tasks
-    REQUIRED FOR PHASE 2: Returns list of all tasks with graders
+    List all available tasks with graders
+    REQUIRED FOR PHASE 2: Returns list of all tasks with graders from official registry
     """
-    return JSONResponse(
-        {
-            "tasks": [
-                {
-                    "name": "easy",
-                    "difficulty": 1,
-                    "description": "Gateway is 1 hop away, high battery",
-                    "max_steps": 5,
-                    "grader": {
-                        "class": "graders.RewardThresholdGrader",
-                        "module": "graders",
-                        "config": {
-                            "min_reward": 0.0,
-                            "max_reward": 1.0,
-                            "success_threshold": 0.8
-                        }
-                    },
-                },
-                {
-                    "name": "medium",
-                    "difficulty": 2,
-                    "description": "Gateway is 3 hops away, moderate battery",
-                    "max_steps": 10,
-                    "grader": {
-                        "class": "graders.EfficientGrader",
-                        "module": "graders",
-                        "config": {
-                            "success_threshold": 0.6
-                        }
-                    },
-                },
-                {
-                    "name": "hard",
-                    "difficulty": 3,
-                    "description": "Gateway is 5+ hops away, low battery",
-                    "max_steps": 20,
-                    "grader": {
-                        "class": "graders.RobustnessGrader",
-                        "module": "graders",
-                        "config": {
-                            "success_threshold": 0.5
-                        }
-                    },
-                },
-            ]
-        },
-        status_code=200,
-    )
+    all_tasks = get_all_tasks()
+    tasks_response = []
+    
+    for task_name, task in all_tasks.items():
+        tasks_response.append({
+            "name": task.name,
+            "difficulty": task.difficulty.value,
+            "description": task.description,
+            "max_steps": task.max_steps,
+            "grader": {
+                "class": f"graders.{task.grader_class.__name__}",
+                "module": "graders",
+                "type": task.grader_class.__name__,
+                "config": task.grader_config
+            }
+        })
+    
+    return JSONResponse({
+        "tasks": tasks_response,
+        "total_tasks": len(tasks_response),
+        "validation": validate_tasks()
+    }, status_code=200)
+
+
+@app.get("/validate-tasks")
+async def validate_tasks_endpoint():
+    """
+    PHASE 2 VALIDATOR ENDPOINT: Explicitly validate that 3+ tasks with graders exist
+    Returns validation details that the OpenEnv validator can parse
+    """
+    validation_result = validate_tasks()
+    return JSONResponse({
+        "status": "valid" if validation_result["validation_passed"] else "invalid",
+        "total_tasks": validation_result["total_tasks"],
+        "tasks_with_graders": validation_result["tasks_with_graders"],
+        "grader_implementations": validation_result["grader_implementations"],
+        "task_details": validation_result["tasks"],
+        "validation_passed": validation_result["validation_passed"],
+        "message": f"✅ Submission has {validation_result['tasks_with_graders']} tasks with graders" if validation_result["validation_passed"] else "❌ Not enough tasks with graders"
+    }, status_code=200)
 
 
 @app.post("/grade")

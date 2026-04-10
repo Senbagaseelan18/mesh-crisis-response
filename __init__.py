@@ -22,6 +22,21 @@ from graders import (
     GRADER_REGISTRY,
 )
 
+# Export tasks registry - CRITICAL FOR VALIDATOR DISCOVERY
+from tasks import (
+    Task,
+    ALL_TASKS,
+    EASY_TASK,
+    MEDIUM_TASK,
+    HARD_TASK,
+    get_all_tasks,
+    get_task,
+    get_task_grader,
+    validate_tasks,
+    AVAILABLE_TASKS_COUNT,
+    GRADERS_PER_TASK,
+)
+
 # Export environment
 from server.environment import MeshNetworkEnvironment, TaskGrader
 
@@ -41,6 +56,18 @@ __all__ = [
     "RobustnessGrader",
     "get_grader",
     "GRADER_REGISTRY",
+    # Tasks - CRITICAL FOR VALIDATOR
+    "Task",
+    "ALL_TASKS",
+    "EASY_TASK",
+    "MEDIUM_TASK", 
+    "HARD_TASK",
+    "get_all_tasks",
+    "get_task",
+    "get_task_grader",
+    "validate_tasks",
+    "AVAILABLE_TASKS_COUNT",
+    "GRADERS_PER_TASK",
     # Environment
     "MeshNetworkEnvironment",
     "TaskGrader",
