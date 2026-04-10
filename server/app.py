@@ -297,28 +297,39 @@ async def grade_task(request: GradeRequest):
 
 
 @app.get("/grade/{difficulty}")
-async def grade_task_get(difficulty: str, n_episodes: int = 10):
+async def grade_task_get(difficulty: str, n_episodes: int = 1):
     """
-    Alternative GET endpoint for grading (for simple testing)
-    REQUIRED FOR PHASE 2: Allows /grade/easy, /grade/medium, /grade/hard
+    Alternative GET endpoint for grading by difficulty
+    REQUIRED FOR PHASE 2: Allows /grade/easy, /grade/medium, /grade/hard, /grade/expert, /grade/extreme
+    Auto-selects the appropriate grader for that task
     """
     try:
-        diff_map = {
-            "easy": TaskDifficulty.EASY,
-            "medium": TaskDifficulty.MEDIUM,
-            "hard": TaskDifficulty.HARD,
+        # Map difficulty names to tasks
+        task_map = {
+            "easy": "easy",
+            "medium": "medium",
+            "hard": "hard",
+            "expert": "expert",
+            "extreme": "extreme",
         }
 
-        if difficulty.lower() not in diff_map:
+        if difficulty.lower() not in task_map:
             return JSONResponse(
-                {"error": f"Invalid difficulty: {difficulty}"},
+                {"error": f"Invalid difficulty: {difficulty}. Must be one of: easy, medium, hard, expert, extreme"},
                 status_code=400,
             )
 
-        task_difficulty = diff_map[difficulty.lower()]
-        env = MeshNetworkEnvironment(task_difficulty)
+        task_name = task_map[difficulty.lower()]
         
-        grader = RewardThresholdGrader(min_reward=0.0, max_reward=1.0, success_threshold=0.5)
+        # Get the appropriate grader and environment for this task
+        from tasks import get_task, get_task_grader
+        from models import MeshObservation, MeshAction
+        
+        task = get_task(task_name)
+        grader = get_task_grader(task_name)
+        task_difficulty = task.difficulty
+        
+        env = MeshNetworkEnvironment(task_difficulty)
 
         # Default random agent
         def random_agent(obs: MeshObservation) -> MeshAction:
@@ -327,11 +338,14 @@ async def grade_task_get(difficulty: str, n_episodes: int = 10):
                 return MeshAction(target_device_id=target.device_id, priority=1)
             return MeshAction(target_device_id="node_0", priority=1)
 
+        # Grade with the task's grader
         result = grader.grade(random_agent, env, n_episodes=n_episodes)
 
         return JSONResponse(
             {
+                "task": task_name,
                 "difficulty": difficulty,
+                "grader": type(grader).__name__,
                 "score": float(result.get("score", 0.0)),
                 "success": bool(result.get("success", False)),
                 "success_rate": float(result.get("success_rate", 0.0)),
@@ -352,31 +366,48 @@ async def grade_task_get(difficulty: str, n_episodes: int = 10):
 async def get_graders():
     """
     REQUIRED FOR PHASE 2: List all available grader implementations
-    Shows all grader classes that can be instantiated
+    Shows all 5 grader classes that can be instantiated
     """
+    from graders import BatteryEfficientGrader, BalancedMetricsGrader
+    
     return JSONResponse(
         {
+            "total_graders": 5,
             "graders": [
                 {
                     "name": "default",
                     "class": "RewardThresholdGrader",
                     "module": "graders",
-                    "supported_tasks": ["easy", "medium", "hard"],
+                    "supported_tasks": ["easy", "medium", "hard", "expert", "extreme"],
                     "description": "Grades based on reward thresholds",
                 },
                 {
                     "name": "efficient",
                     "class": "EfficientGrader",
                     "module": "graders",
-                    "supported_tasks": ["easy", "medium", "hard"],
+                    "supported_tasks": ["easy", "medium", "hard", "expert", "extreme"],
                     "description": "Grades based on hop efficiency",
                 },
                 {
                     "name": "robustness",
                     "class": "RobustnessGrader",
                     "module": "graders",
-                    "supported_tasks": ["easy", "medium", "hard"],
+                    "supported_tasks": ["easy", "medium", "hard", "expert", "extreme"],
                     "description": "Grades on robustness across conditions",
+                },
+                {
+                    "name": "battery_efficient",
+                    "class": "BatteryEfficientGrader",
+                    "module": "graders",
+                    "supported_tasks": ["expert", "extreme"],
+                    "description": "Grades on battery efficiency with constrained power",
+                },
+                {
+                    "name": "balanced",
+                    "class": "BalancedMetricsGrader",
+                    "module": "graders",
+                    "supported_tasks": ["expert", "extreme"],
+                    "description": "Balanced grader combining success, efficiency, and reward metrics",
                 }
             ]
         },
@@ -384,9 +415,71 @@ async def get_graders():
     )
 
 
-# ============================================================================
+@app.get("/grade-all-tasks")
+async def grade_all_tasks(n_episodes: int = 1):
+    """
+    CRITICAL FOR PHASE 2: Grade all 5 tasks with their respective graders
+    This endpoint is what the validator calls to verify all tasks can be graded
+    """
+    from tasks import get_all_tasks, get_task_grader
+    from models import MeshObservation, MeshAction
+    
+    results = []
+    
+    try:
+        all_tasks = get_all_tasks()
+        
+        for task_name, task in all_tasks.items():
+            try:
+                # Get grader for this task
+                grader = get_task_grader(task_name)
+                env = MeshNetworkEnvironment(task.difficulty)
+                
+                # Random agent
+                def random_agent(obs: MeshObservation) -> MeshAction:
+                    if obs.neighboring_devices:
+                        return MeshAction(target_device_id=obs.neighboring_devices[0].device_id, priority=1)
+                    return MeshAction(target_device_id="node_0", priority=1)
+                
+                # Grade
+                result = grader.grade(random_agent, env, n_episodes=n_episodes)
+                
+                results.append({
+                    "task_name": task_name,
+                    "grader_type": type(grader).__name__,
+                    "score": float(result.get("score", 0.0)),
+                    "success": bool(result.get("success", False)),
+                    "success_rate": float(result.get("success_rate", 0.0)),
+                    "average_reward": float(result.get("average_reward", 0.0)),
+                    "status": "✅ PASS" if 0 < result.get("score", 0.0) < 1.0 else "❌ FAIL"
+                })
+            except Exception as e:
+                results.append({
+                    "task_name": task_name,
+                    "error": str(e),
+                    "status": "❌ ERROR"
+                })
+        
+        # Summary
+        passed = sum(1 for r in results if r.get("status") == "✅ PASS")
+        total = len(results)
+        
+        return JSONResponse({
+            "summary": {
+                "total_tasks": total,
+                "tasks_passed": passed,
+                "validation_passed": passed >= 3
+            },
+            "tasks": results
+        }, status_code=200)
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
 # Validation & Debug Endpoints
-# ============================================================================
 
 @app.get("/validate")
 async def validate():
