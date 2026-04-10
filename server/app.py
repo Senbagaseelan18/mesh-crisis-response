@@ -206,7 +206,7 @@ async def get_tasks():
                     "description": "Gateway is 1 hop away, high battery",
                     "max_steps": 5,
                     "grader": {
-                        "class": "RewardThresholdGrader",
+                        "class": "graders.RewardThresholdGrader",
                         "module": "graders",
                         "config": {
                             "min_reward": 0.0,
@@ -221,11 +221,9 @@ async def get_tasks():
                     "description": "Gateway is 3 hops away, moderate battery",
                     "max_steps": 10,
                     "grader": {
-                        "class": "RewardThresholdGrader",
+                        "class": "graders.EfficientGrader",
                         "module": "graders",
                         "config": {
-                            "min_reward": 0.0,
-                            "max_reward": 1.0,
                             "success_threshold": 0.6
                         }
                     },
@@ -236,11 +234,9 @@ async def get_tasks():
                     "description": "Gateway is 5+ hops away, low battery",
                     "max_steps": 20,
                     "grader": {
-                        "class": "RewardThresholdGrader",
+                        "class": "graders.RobustnessGrader",
                         "module": "graders",
                         "config": {
-                            "min_reward": 0.0,
-                            "max_reward": 1.0,
                             "success_threshold": 0.5
                         }
                     },

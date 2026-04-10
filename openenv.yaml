@@ -48,6 +48,7 @@ tasks:
       hop_limit: 5
       min_battery: 100
     grader:
+      type: "reward_threshold"
       class: "graders.RewardThresholdGrader"
       module: "graders"
       config:
@@ -64,6 +65,7 @@ tasks:
       hop_limit: 10
       min_battery: 60
     grader:
+      type: "efficient"
       class: "graders.EfficientGrader"
       module: "graders"
       config:
@@ -78,6 +80,7 @@ tasks:
       hop_limit: 20
       min_battery: 30
     grader:
+      type: "robustness"
       class: "graders.RobustnessGrader"
       module: "graders"
       config:
