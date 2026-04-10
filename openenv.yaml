@@ -64,11 +64,9 @@ tasks:
       hop_limit: 10
       min_battery: 60
     grader:
-      class: "graders.RewardThresholdGrader"
+      class: "graders.EfficientGrader"
       module: "graders"
       config:
-        min_reward: 0.0
-        max_reward: 1.0
         success_threshold: 0.6
 
   hard:
@@ -80,11 +78,9 @@ tasks:
       hop_limit: 20
       min_battery: 30
     grader:
-      class: "graders.RewardThresholdGrader"
+      class: "graders.RobustnessGrader"
       module: "graders"
       config:
-        min_reward: 0.0
-        max_reward: 1.0
         success_threshold: 0.5
 
 # MANDATORY: Grader implementations
