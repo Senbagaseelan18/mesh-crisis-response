@@ -545,6 +545,19 @@ def main():
     import uvicorn
     from tasks import validate_tasks
 
+    # DEBUG: List files in /app to verify openenv.yaml is present
+    print("\n" + "="*60)
+    print("DEBUG: FILES IN CONTAINER ROOT (/app)")
+    print("="*60)
+    app_files = os.listdir("/app")
+    print(f"Total files: {len(app_files)}")
+    print(f"Files: {sorted(app_files)}")
+    if "openenv.yaml" in app_files:
+        print("✅ openenv.yaml FOUND in /app root")
+    else:
+        print("❌ openenv.yaml NOT FOUND in /app root - THIS IS THE BUG")
+    print("="*60 + "\n")
+
     port = int(os.environ.get("PORT", 7860))
     validation = validate_tasks()
     
