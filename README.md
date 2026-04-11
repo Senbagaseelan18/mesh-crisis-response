@@ -9,256 +9,407 @@ pinned: true
 
 <div align="center">
 
-# 🚨 Emergency Mesh-Network Router
+# 🚨 **EMERGENCY MESH-NETWORK ROUTER** 🚨
 
-### An OpenEnv RL Environment for Emergency Alert Routing
+## *Your AI's Mission: Save Lives Through Intelligent Routing* 💪
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![HF Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/SenbagaseelanV/emergency-mesh-router)
-[![OpenEnv](https://img.shields.io/badge/openenv-core-green)](https://github.com/openenv-ai/openenv-core)
+<br>
 
-*A reinforcement learning challenge environment for training intelligent agents to optimize emergency alert routing through mesh networks during crisis scenarios.*
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-2E86AB?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688?logo=fastapi&logoColor=white&style=for-the-badge)](https://fastapi.tiangolo.com/)
+[![OpenAI](https://img.shields.io/badge/LLM-Integrated-412991?logo=openai&logoColor=white&style=for-the-badge)](https://openai.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white&style=for-the-badge)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![HF Spaces](https://img.shields.io/badge/🤗_HuggingFace-Live_Demo-orange?style=for-the-badge)](https://huggingface.co/spaces/SenbagaseelanV/emergency-mesh-router)
+
+### 🎯 *Advanced RL Environment with LLM Integration*
+
+✨ **Train intelligent AI agents to route emergency alerts through mesh networks**  
+🌍 *Real-world inspired crisis communication*  
+⚡ *Production-ready with full API support*
+
+</div>
+
+<br>
+
+---
+
+## 🚀 **Quick Navigation**
+
+<div align="center">
+
+| 📖 | 💻 | 🎮 | 🌐 |
+|:--:|:--:|:--:|:--:|
+| [**About**](#-about) | [**Install**](#-setup) | [**Tasks**](#-challenge-levels) | [**API**](#-api-reference) |
 
 </div>
 
 ---
 
-## 🎯 Overview
+## 📋 **About This Project**
 
-The **Emergency Mesh-Network Router** is a complete OpenEnv environment designed to train and evaluate RL agents in handling real-world emergency communications. Agents must route critical alerts through limited, unreliable mesh network nodes while managing bandwidth, latency, and node failures—a simulation of actual crisis response challenges.
+<div align="left">
+
+> ### 💡 **The Challenge**
+> 
+> In disaster scenarios, **communication networks collapse**. Emergency services must get their message through. 
+> But routing through failed nodes while managing **battery, bandwidth, and latency** is a **complex optimization problem**.
+>
+> **Your job?** Train RL agents using specialized graders to find the best routes. 🎯
 
 ### 🌟 Why This Matters
-- **Real-world relevance**: Crisis communication routing is a critical problem in disaster management
-- **Multi-agent learning**: Train agents to make optimal routing decisions under uncertainty
-- **Scalable complexity**: Three difficulty levels from basic routing to complex multi-network scenarios
+
+- 🚨 **Real-World Impact**: Crisis communication is critical for disaster response
+- 🤖 **Advanced AI**: Multi-phase training with 5 specialized evaluation systems  
+- 🌐 **Complex Environment**: Dynamic networks, cascading failures, resource constraints
+- 📈 **Scalable Learning**: Progressive difficulty from novice to expert challenge
+- 🧠 **LLM Ready**: Integrates with OpenAI for intelligent routing decisions
+
+</div>
 
 ---
 
-## ✨ Key Features
+## ⚡ **Key Features**
 
-| Feature | Description |
-|---------|-------------|
-| 🤖 **Multiple Agent Types** | Baseline (Random, Greedy, Intelligent, Conservative, Explorative) + Advanced ML (DQN, PPO, Adaptive) |
-| 📊 **Interactive Dashboard** | Real-time visualization of mesh topology, agent performance, and network metrics |
-| 🎚️ **Task Difficulties** | Easy → Medium → Hard with progressive complexity and reward shaping |
-| 🔌 **RESTful API** | Full OpenEnv spec compliance with async/await support |
-| 🐳 **Docker Ready** | One-command deployment to Hugging Face Spaces or local environments |
-| 📈 **Performance Tracking** | Detailed metrics, reward graphs, and episode history |
+<table align="center">
+<tr>
+<td align="center" width="33%">
+
+### 🤖 5 Task Levels
+Easy → Expert → Extreme  
+Progressive complexity
+
+</td>
+<td align="center" width="33%">
+
+### 🧠 5 Specialized Graders
+Comprehensive evaluation  
+Reward-based learning
+
+</td>
+<td align="center" width="33%">
+
+### 📊 Live Dashboard
+Real-time metrics  
+Beautiful UI
+
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+
+### 🔌 Full APIs
+Phase 2+ compliant  
+Complete endpoints
+
+</td>
+<td align="center" width="33%">
+
+### 🐳 Docker Ready
+One-click deploy  
+Production quality
+
+</td>
+<td align="center" width="33%">
+
+### ⚙️ Configurable
+YAML-based settings  
+Easy customization
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🚀 Quick Start
+## 💻 **Setup**
 
-### Local Development
+### 📦 Installation (2 Minutes)
 
 ```bash
-# Clone the repository
-git clone https://github.com/Senbagaseelan18/mesh-crisis-response
+# 1️⃣ Clone the repository
+git clone https://github.com/Senbagaseelan18/mesh-crisis-response.git
 cd mesh-crisis-response
 
-# Install dependencies
+# 2️⃣ Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3️⃣ Install dependencies
 pip install -r requirements.txt
-
-# Start the server
-python -m server.app
-
-# Open dashboard
-# Visit: http://localhost:8000/dashboard
 ```
 
-### Deployed Instance
-
-👉 **Live Demo**: [Emergency Mesh-Network Router on HF Spaces](https://huggingface.co/spaces/SenbagaseelanV/emergency-mesh-router)
-
----
-
-## 📡 API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Environment health status |
-| `/reset` | POST | Reset environment and return initial observation |
-| `/step` | POST | Execute an action and return observation, reward, done, info |
-| `/state` | GET | Get current environment state |
-| `/dashboard` | GET | Interactive web interface |
-
-### Example API Usage
+### ▶️ Run Locally
 
 ```bash
-# Reset environment
-curl -X POST http://localhost:8000/reset
+# Start the FastAPI server
+python -m server.app
 
-# Take a step
-curl -X POST http://localhost:8000/step \
-  -H "Content-Type: application/json" \
-  -d '{"action": "route_alert_via_node_5"}'
+# 🌐 Open in your browser
+# http://localhost:7860
 
-# Get current state
-curl -X GET http://localhost:8000/state
+# 📊 View dashboard
+# http://localhost:7860/dashboard
+```
+
+### 🐳 Docker Deployment
+
+```bash
+# Build image
+docker build -t mesh-router .
+
+# Run container
+docker run -p 7860:7860 mesh-router
+
+# 🌐 Access
+# http://localhost:7860
+```
+
+### 🌍 Live Demo
+
+**[🚀 Try the Live Demo](https://huggingface.co/spaces/SenbagaseelanV/emergency-mesh-router)**
+
+---
+
+## 🎮 **Challenge Levels**
+
+### 🟢 **EASY: Basic Routing**
+```
+📍 Scenario: Small 5-node network
+🔋 Reliability: 80% connectivity
+📏 Max Steps: 15
+🎯 Objective: Route 3 alerts successfully
+✅ Success: Score ≥ 0.6
+```
+
+### 🟡 **MEDIUM: Multi-Network**
+```
+📍 Scenario: 8 nodes with 2 subnets
+🔋 Reliability: 70% connectivity
+📏 Max Steps: 20
+🎯 Objective: Handle congestion
+✅ Success: Score ≥ 0.7
+```
+
+### 🔴 **HARD: Crisis Mode**
+```
+📍 Scenario: 12 nodes with cascading failures
+🔋 Reliability: 60% connectivity
+📏 Max Steps: 30
+🎯 Objective: Dynamic priority routing
+✅ Success: Score ≥ 0.8
+```
+
+### 🟣 **EXPERT: Advanced Tactics**
+```
+📍 Scenario: 15 nodes, complex topology
+🔋 Reliability: 50% connectivity
+📏 Max Steps: 40
+🎯 Objective: Battery & bandwidth optimization
+✅ Success: Score ≥ 0.85
+```
+
+### ⚫ **EXTREME: Master Challenge**
+```
+📍 Scenario: 20 nodes, full chaos
+🔋 Reliability: 40% connectivity
+📏 Max Steps: 50
+🎯 Objective: Balanced metrics excellence
+✅ Success: Score ≥ 0.9
 ```
 
 ---
 
-## 🎓 Tasks & Difficulty Levels
+## 🔌 **API Reference**
 
-### Easy: Basic Routing Challenge
-- **Scenario**: 5-node network, 80% reliability
-- **Objective**: Route 3 alerts successfully
-- **Max Steps**: 15
-- **Success Threshold**: Score ≥ 0.7
+### 📡 **Core Endpoints**
 
-### Medium: Multi-Network Routing  
-- **Scenario**: 8-node network with 2 subnets, 70% reliability
-- **Objective**: Route 5 alerts while managing congestion
-- **Max Steps**: 25
-- **Success Threshold**: Score ≥ 0.75
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Server status |
+| `GET` | `/health` | Health check |
+| `POST` | `/reset` | Initialize environment |
+| `POST` | `/step` | Execute action |
+| `GET` | `/state` | Get current state |
+| `GET` | `/tasks` | List available tasks |
+| `GET` | `/graders` | List grading systems |
+| `GET` | `/validate-tasks` | Validate configuration |
 
-### Hard: Crisis Optimization
-- **Scenario**: 12-node network, cascading failures, 60% reliability
-- **Objective**: Route 10 alerts with dynamic priorities
-- **Max Steps**: 40
-- **Success Threshold**: Score ≥ 0.8
+### 💬 **Usage Examples**
+
+```bash
+# Reset environment for easy task
+curl -X POST http://localhost:7860/reset?difficulty=easy
+
+# Take an action  
+curl -X POST http://localhost:7860/step \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target_device_id": "node_3",
+    "priority": 1
+  }'
+
+# Get current state
+curl -X GET http://localhost:7860/state
+
+# List all tasks
+curl -X GET http://localhost:7860/tasks
+
+# View grading systems
+curl -X GET http://localhost:7860/graders
+
+# Validate tasks configuration
+curl -X GET http://localhost:7860/validate-tasks
+```
 
 ---
 
-## 📊 Reward Function
+## 📊 **Reward System**
 
 ```
 Total Reward = (Successful Alerts × Alert_Weight)
-             - (Failed Alerts × Failure_Penalty)  
-             - (Network Congestion × Congestion_Penalty)
-             - (Step_Penalty × Steps_Taken)
+             - (Failed Alerts × Failure_Penalty)
+             - (Network_Congestion × Congestion_Cost)
+             - (Steps_Taken × Step_Penalty)
 ```
 
-Rewards provide **partial progress signals** throughout episodes, encouraging agents to find optimal routing quickly without unnecessary steps.
+**Partial rewards encourage efficient routing!** ✨
 
 ---
 
-## 🔧 Configuration
+## 🧠 **Grading Systems**
 
-Environment behavior is controlled via `openenv.yaml`:
+| Grader | Focus | Best For |
+|--------|-------|----------|
+| 🏆 **RewardThreshold** | Total reward | Balanced learning |
+| ⚡ **Efficient** | Hop optimization | Quick routing |
+| 💪 **Robustness** | Failure handling | Reliability |
+| 🔋 **BatteryEfficient** | Energy management | Long-term ops |
+| ⚖️ **BalancedMetrics** | Multi-objective | Expert challenge |
+
+---
+
+## 📁 **Project Structure**
+
+```
+📦 mesh-crisis-response/
+│
+├── 🤖 agents/                    # AI Routing Agents
+│   ├── agents.py                 # Baseline agents
+│   └── advanced_agents.py        # Advanced ML agents
+│
+├── 🧠 ml/                        # Machine Learning
+│   ├── benchmarks.py             # Performance metrics
+│   ├── training_framework.py     # Training pipeline
+│   ├── enhanced_environment.py   # Features & obstacles
+│   └── metrics_dashboard.py      # Visualization
+│
+├── 🔌 server/                    # FastAPI Server
+│   ├── app.py                    # Main server
+│   ├── environment.py            # Environment class
+│   ├── dashboard.py              # Web interface
+│   └── conftest.py               # Testing config
+│
+├── 📋 Configuration
+│   ├── openenv.yaml              # Environment config
+│   ├── pyproject.toml            # Project settings
+│   └── requirements.txt          # Dependencies
+│
+├── 🎯 Core Logic
+│   ├── graders.py                # 5 grading systems
+│   ├── tasks.py                  # 5 task definitions
+│   ├── models.py                 # Data models
+│   └── inference.py              # LLM inference
+│
+└── 📚 Documentation
+    └── README.md                 # This file
+```
+
+---
+
+## 🚀 **Deployment**
+
+### HuggingFace Spaces
 
 ```yaml
-Environment:
-  name: "emergency-mesh-router"
-  version: "1.0.0"
-  description: "RL environment for emergency alert routing"
-  
-Tasks:
-  - name: "easy"
-    difficulty: 1
-    max_steps: 15
-  - name: "medium"  
-    difficulty: 2
-    max_steps: 25
-  - name: "hard"
-    difficulty: 3
-    max_steps: 40
+# .hf-config.yml
+title: Emergency Mesh-Network Router
+sdk: docker
+sdk_version: latest
+app_file: server/app.py
+models:
+  - gpt-3.5-turbo
+  - gpt-4
 ```
 
----
-
-## 👥 Contributors
-
-<div align="center">
-
-### 🏆 Team Members
-
-| Name | Role |
-|------|------|
-| **Senbagaseelan V** | Lead Developer, RL Implementation |
-| **Nishalini BA** | Environment Design, Reward Shaping |
-| **Athul Krishna A** | Dashboard Development, API Integration |
-
-</div>
-
----
-
-## 🙏 Acknowledgments
-
-This project was developed for the **OpenEnv Hackathon 2026**, organized by the OpenEnv community. We're grateful to the organizing team for creating this platform to advance RL environment development and benchmarking.
-
-**Hackathon Organizers**:
-- OpenEnv Core Team
-- Hugging Face Spaces Team
-- OpenEnv Community Contributors
-
----
-
-## 📋 Requirements
-
-- **Python**: 3.10+
-- **Docker**: For containerized deployment
-- **System**: 2+ vCPU, 8GB+ RAM
-- **Runtime**: Inference completes in <20 minutes
-
----
-
-## 📦 Installation
-
-### From Source
+### Docker Hub
 
 ```bash
-git clone https://github.com/Senbagaseelan18/mesh-crisis-response
-cd mesh-crisis-response
-pip install -r requirements.txt
+docker build -t username/mesh-router:latest .
+docker push username/mesh-router:latest
 ```
 
-### Docker
+### Local Docker Compose
 
-```bash
-docker build -t emergency-mesh-router .
-docker run -p 8000:8000 emergency-mesh-router
-```
-
----
-
-## 🧪 Testing
-
-Run the validation suite:
-
-```bash
-# Validate OpenEnv spec compliance
-openenv validate
-
-# Run baseline inference
-python inference.py
-
-# Test endpoints locally
-python test_endpoints_local.py http://localhost:8000
+```yaml
+version: '3.8'
+services:
+  mesh-router:
+    build: .
+    ports:
+      - "7860:7860"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 ```
 
 ---
 
-## 📚 Documentation
+## 📈 **Performance Metrics**
 
-- 📖 [Full Documentation](./docs/)
-- 🚀 [Deployment Guide](./DEPLOY_TO_HF_SPACES.md)
-- 🐛 [Debugging Guide](./DEBUGGING_GUIDE.md)
-- 📊 [Project Summary](./docs/PROJECT_SUMMARY.md)
+Track your agent's performance:
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
+- 📊 **Success Rate**: Percentage of alerts delivered
+- ⏱️ **Hop Count**: Average hops per alert
+- 🔋 **Battery Usage**: Energy efficiency
+- 🚀 **Latency**: Time to delivery
+- 💰 **Cost Efficiency**: Resource optimization
 
 ---
 
-## 🤝 Contributing
+## 🔒 **License**
 
-Contributions are welcome! Please feel free to submit a Pull Request or open an issue for bugs and feature requests.
+This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 📞 **Support**
+
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Senbagaseelan18/mesh-crisis-response/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Senbagaseelan18/mesh-crisis-response/discussions)
+- 📧 **Email**: See repository contact info
+
+---
+
+## 🎉 **Get Involved**
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ---
 
 <div align="center">
 
-### 🎉 Built with OpenEnv
+### 🌟 **Made with ❤️ for Emergency Response** 🌟
 
-**[View on GitHub](https://github.com/Senbagaseelan18/mesh-crisis-response)** | **[Try on HF Spaces](https://huggingface.co/spaces/SenbagaseelanV/emergency-mesh-router)**
-
-Made with ❤️ for emergency response systems
+**[⭐ Star Us on GitHub](https://github.com/Senbagaseelan18/mesh-crisis-response)** | **[🚀 Try Live Demo](https://huggingface.co/spaces/SenbagaseelanV/emergency-mesh-router)** | **[📖 Read Docs](docs/README.md)**
 
 </div>
 
+---
+
+**Last Updated:** April 2026 | **Version:** 1.0.0 | **Status:** ✅ Production Ready
