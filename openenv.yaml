@@ -37,123 +37,26 @@ action_space:
   n: 12
   description: "Target device ID for forwarding alert"
 
-# MANDATORY: Tasks with explicit graders
+# MANDATORY: Tasks with explicit graders (SIMPLIFIED FORMAT FOR VALIDATOR)
 tasks:
   easy:
-    name: "Easy - Direct Path"
-    description: "Gateway is 1 hop away, high battery"
-    difficulty: 1
-    max_steps: 5
-    config:
-      hop_limit: 5
-      min_battery: 100
-    grader:
-      type: "reward_threshold"
-      class: "graders.RewardThresholdGrader"
-      module: "graders"
-      config:
-        min_reward: 0.0
-        max_reward: 1.0
-        success_threshold: 0.8
-
+    grader: RewardThresholdGrader
   medium:
-    name: "Medium - Multi-hop"
-    description: "Gateway is 3 hops away, moderate battery"
-    difficulty: 2
-    max_steps: 10
-    config:
-      hop_limit: 10
-      min_battery: 60
-    grader:
-      type: "efficient"
-      class: "graders.EfficientGrader"
-      module: "graders"
-      config:
-        success_threshold: 0.6
-
+    grader: EfficientGrader
   hard:
-    name: "Hard - Long Distance"
-    description: "Gateway is 5+ hops away, low battery"
-    difficulty: 3
-    max_steps: 20
-    config:
-      hop_limit: 20
-      min_battery: 30
-    grader:
-      type: "robustness"
-      class: "graders.RobustnessGrader"
-      module: "graders"
-      config:
-        success_threshold: 0.5
-
+    grader: RobustnessGrader
   expert:
-    name: "Expert - Battery Constrained"
-    description: "Gateway is far away with severe battery constraints"
-    difficulty: 4
-    max_steps: 25
-    config:
-      hop_limit: 25
-      min_battery: 20
-    grader:
-      type: "battery_efficient"
-      class: "graders.BatteryEfficientGrader"
-      module: "graders"
-      config:
-        success_threshold: 0.55
-
+    grader: BatteryEfficientGrader
   extreme:
-    name: "Extreme - Balanced Performance"
-    description: "Extreme challenge requiring balanced performance across all metrics"
-    difficulty: 5
-    max_steps: 30
-    config:
-      hop_limit: 30
-      min_battery: 10
-    grader:
-      type: "balanced"
-      class: "graders.BalancedMetricsGrader"
-      module: "graders"
-      config:
-        success_threshold: 0.5
+    grader: BalancedMetricsGrader
 
-# MANDATORY: Grader implementations
+# MANDATORY: Grader implementations (SIMPLIFIED FORMAT FOR VALIDATOR)
 graders:
-  default:
-    class: "graders.RewardThresholdGrader"
-    module: "graders"
-    description: "Grades based on reward thresholds"
-    config:
-      min_reward: 0.0
-      max_reward: 1.0
-      success_threshold: 0.5
-  
-  efficient:
-    class: "graders.EfficientGrader"
-    module: "graders"
-    description: "Grades based on hop efficiency"
-    config:
-      success_threshold: 0.6
-  
-  robustness:
-    class: "graders.RobustnessGrader"
-    module: "graders"
-    description: "Grades on robustness across conditions"
-    config:
-      success_threshold: 0.5
-  
-  battery_efficient:
-    class: "graders.BatteryEfficientGrader"
-    module: "graders"
-    description: "Grades on battery efficiency with constrained power"
-    config:
-      success_threshold: 0.55
-  
-  balanced:
-    class: "graders.BalancedMetricsGrader"
-    module: "graders"
-    description: "Balanced grader combining success, efficiency, and reward metrics"
-    config:
-      success_threshold: 0.5
+  RewardThresholdGrader: {}
+  EfficientGrader: {}
+  RobustnessGrader: {}
+  BatteryEfficientGrader: {}
+  BalancedMetricsGrader: {}
 
 # Metadata
 metadata:
